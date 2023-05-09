@@ -1,0 +1,166 @@
+---
+title: "Economic Freedom Report"
+subtitle: "The Heritage Foundation "
+author: "Bhargav Prajapati"
+date: "04/05/2023"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+#Data Source
+```{r setup, echo = F, message = F, error = F, warning = F}
+options(htmltools.dir.version = FALSE)
+
+setwd('C:/Users/bharg/OneDrive/Desktop/SIS/Data Analysis/awd')
+library(tidyverse)
+library(rmarkdown)
+library(knitr)
+library(dplyr) 
+
+
+efi = read_csv('efi2019.csv')
+efi = efi %>%
+select(-Country1)
+efi = efi %>% rename("score" = "2019_Score")
+efi = efi %>% mutate_at(c('score', 'fdi_mil'), as.numeric)
+efi$PPPGDP_growthrate = as.numeric(gsub("[\\$,]", "", efi$PPPGDP_growthrate))
+efi = efi %>% rename("gdppc" = "PPPGDP_growthrate")
+
+FctWhen = function(...) {
+  args = rlang::list2(...)
+  rhs = map(args, rlang::f_rhs)
+  cases = case_when( !!!args )
+  exec(fct_relevel, cases, !!!rhs)
+}  
+
+
+efi = efi %>%  
+  mutate(
+    ef = FctWhen(
+     between(score,0,50)~'Low',
+     between(score,50.1,75)~'Medium',
+     between(score,75.1,100)~'High'))
+                   
+                   
+
+
+knitr::include_graphics('worldlights.jpg')
+```
+
+- The Economic Freedom Index data set is used to measure and compare the level of economic freedom of countries around the world. 
+
+- Published annually by: The Heritage Foundation, a conservative United States based think-tank.
+
+---
+#Methodology
+
+- The index assigns a score to each country on a scale of 0 to 100, with higher scores indicating greater levels of economic freedom. 
+
+- The methodology used to calculate the index is based on various indicators of economic freedom, including property rights, taxation, government spending, and labor freedom. 
+
+- For this particular analysis, I use the 2019 scores. The Economic freedom index published annually. It is an important tool for understanding the economic performance of countries around the world, and it provides valuable insights into the policies and institutions that drive economic growth and prosperity.
+
+---
+class: center, middle
+#Distribution of the Economic Freedom Score
+```{r plot 1, echo = F, message = F, error = F, warning = F}
+my_palette <- c("#87CEEB")
+
+ggplot(efi, aes(x = score)) +
+  geom_histogram(color = "black", 
+                 fill =  my_palette, 
+                 alpha = 0.5) +
+   geom_vline(xintercept = 5.9, color = "red", linetype = "dashed", size = 1) +
+  geom_vline(xintercept = 90.2, color = "green", linetype = "dashed", size = 1) +
+  annotate("text", x = 5.9, y = 0, label = "Min: 5.9", vjust = -10, color = "red") +
+  annotate("text", x = 90.2, y = 0, label = "Max: 90.2", vjust = -10, color = "green") +
+  scale_x_continuous(breaks = c(0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100))+
+  labs(title = "Distribution of Scores", 
+       x = "Score", 
+       y = "") +
+  theme_minimal() +
+    theme(axis.text.x = element_text(size = 10,
+                                   face = "bold"),
+        axis.line.x = element_line(linetype = "solid"),
+        plot.title = element_text(size = 12,
+                                  face = 'bold'),
+        plot.subtitle = element_text(size = 10),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.text.y  = element_text(size= 10,
+                                    face = "bold"))
+```
+
+---
+class: center, middle
+#Positive Relationship between Economic Freedom and FDI
+```{r Plot 2, echo = F, message = F, error = F, warning = F}
+
+ggplot(efi, aes(score,
+                    fdi_mil)) +
+  geom_point(shape=21,
+             color='black',
+             fill='red',
+             size=2)+
+  geom_smooth(method=lm, 
+              SD = F) +
+  labs(title = 'Economic Freedom Score and FDI inflows',
+       x = 'Economic Freedom Score',
+       y = "FDI Inflow (Millions)" ) +
+  theme_minimal()
+
+ 
+
+  
+```
+---
+class: center, middle
+#More freedom: Higher Per Capita GDP
+```{r Plot 3, echo = F, message = F, error = F, warning = F}
+
+filter(efi,!is.na(ef)) %>% 
+  ggplot(aes(ef, gdppc)) + 
+  geom_boxplot(aes(fill=ef), 
+               outlier.shape=NA, 
+               alpha=0.2,
+               show.legend = FALSE) +   
+  geom_jitter(aes(color=ef), 
+              width=0.15, 
+              height=0,
+              shape=20, 
+              size=2) +
+  labs(title = 'Freedom score and Income',
+       y='GDP Per Capita',
+       x='', 
+       fill='Economic freedom') +
+   ylim(0,75000)+
+  theme_minimal()+
+  theme(axis.text.x = element_text(size = 10,
+                                   face = "bold"),
+        axis.line.x = element_line(linetype = "solid"),
+        plot.title = element_text(size = 12,
+                                  face = 'bold'),
+        plot.subtitle = element_text(size = 10),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.text.y  = element_text(size= 10,
+                                    face = "bold"),
+        legend.text = element_text(colour="black",
+                                   size=6,
+                                   face='bold'),
+        legend.title = element_blank())
+
+
+```
+---
+class: center, middle
+```{r end, echo = F, message = F, error = F, warning = F}
+
+knitr::include_graphics('thank you.jpg')
+```
