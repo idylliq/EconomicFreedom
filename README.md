@@ -1,5 +1,5 @@
 # FDI Inflows and Economic Freedom Index Presentation
-This is a Xaringan presentation that explores the relationship between Foreign Direct Investment (FDI) inflows and the Economic Freedom Index. The presentation uses data from the World Economic Freedom Index dataset and visualizes the data using R.
+This is a `Xaringan` presentation that explores the relationship between Foreign Direct Investment (FDI) inflows and the Economic Freedom Index. The presentation is created using `Rmarkdown`. It uses data from the World Economic Freedom Index dataset and visualizes the data using `ggplot`.
 
 Dataset
 The World Economic Freedom Index dataset contains data on the economic freedom index for various countries. The dataset is available in CSV format and can be downloaded from the Heritage Foundation's website.
